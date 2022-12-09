@@ -11,14 +11,12 @@
     <title>Home Page</title>
   </head>
   <body>
-    {{> header}}
        <div class="container">
-
-          <h2> Register Here</h2>
+          <h2> Login Here</h2>
           {{#if error}}
              <div class="alert alert-danger"> {{error}}</div>
           {{/if}}
-          <form method="post" action="/postregis" enctype="multipart/form-data">
+          <form method="post" action="/postlogin">
             <div class="form-group">
                 <label> Uname</label>
                 <input type="text" name="uname" class="form-control"/>
@@ -27,7 +25,10 @@
                 <label> Password</label>
                 <input type="password" name="password" class="form-control"/>
             </div>
-            <input type="submit" value="Submit" class="btn btn-dark"/>
+            <input type="hidden" name="_csrf" value="{{csrf}}"/>
+            <input type="submit" value="Submit" class="btn btn-success"/>
+             <p>Forgot Password <a href="/resetpassword"> Reset Password</a></p>
+            <p> For new user <a href="/regis"> Click Here</a></p>
           </form>
        </div>
 
