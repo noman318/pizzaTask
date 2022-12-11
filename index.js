@@ -5,7 +5,7 @@ const path = require("path");
 const multer = require("multer");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
-const seceret = "assd123^&*^&*ghghggh";
+const seceret = "noman";
 const oneDay = 1000 * 60 * 60 * 24;
 const sessions = require("express-session");
 const nodemailer = require("nodemailer");
@@ -15,9 +15,8 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const userModel = require("./models/user");
 const tokenModel = require("./models/token");
+mongoose.set('strictQuery',true);
 
-const app = express();
-mongoose.set('strictQuery',true)
 const saltRounds = 10;
 let transporter = nodemailer.createTransport({
   service: "gmail",
@@ -25,7 +24,7 @@ let transporter = nodemailer.createTransport({
   secure: false,
   auth: {
     user: "markjackman31820@gmail.com",
-    pass: "ojzogbgownsoafbq",
+    pass: "vworktlirikcethu",
   },
 });
 transporter.use(
@@ -35,15 +34,22 @@ transporter.use(
     viewPath: "views/emailTemplates/",
   })
 );
+const app = express();
 
-//database connection
-mongoose
-  .connect(
-    "mongodb://localhost:27017/pizzaStore"
-  )
-  .then((res) => console.log("MongoDB Connected"))
-  .catch((err) => console.log("Error : " + err));
-//end
+const connectToDb = mongoose.connect(
+  "mongodb://localhost:27017/pizzaStore",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  },
+  (err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      console.log(`Database connected sucessfully`);
+    }
+  }
+);
 app.use(
   sessions({
     secret: seceret,
@@ -60,8 +66,6 @@ app.engine("handlebars", exphbs.engine());
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 app.use(express.static("uploads"));
-
-//start upload code
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, "/uploads"));
@@ -205,8 +209,6 @@ app.post("/postregis", (req, res) => {
     }
   });
 });
-
-
 app.get("/welcome", (req, res) => {
   //let username=req.cookies.username;
   let username = req.session.username;
