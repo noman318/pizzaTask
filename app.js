@@ -88,23 +88,23 @@ app.get("/", (req, res) => {
 });
 const uploadSingle = upload.single("avatar");
 
-const folderPath = __dirname + "/uploads";
-app.get("/downloadsingle", (req, res) => {
-  let username = req.session.username;
-  if (username) {
-    userModel.findOne({ username: username }, (err, data) => {
-      if (err) {
-      } else {
-        res.download(folderPath + `/${data.image}`, (err) => {
-          if (err) {
-          }
-        });
-      }
-    });
-  } else {
-    res.redirect("/login");
-  }
-});
+// const folderPath = __dirname + "/uploads";
+// app.get("/downloadsingle", (req, res) => {
+//   let username = req.session.username;
+//   if (username) {
+//     userModel.findOne({ username: username }, (err, data) => {
+//       if (err) {
+//       } else {
+//         res.download(folderPath + `/${data.image}`, (err) => {
+//           if (err) {
+//           }
+//         });
+//       }
+//     });
+//   } else {
+//     res.redirect("/login");
+//   }
+// });
 
 app.post("/uploadfile", (req, res) => {
   uploadSingle(req, res, (err) => {
