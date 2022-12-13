@@ -8,13 +8,19 @@
 </head>
 <body>
     {{> header2}}
-    <div class="card" style="width: 18rem;">
-  <img src="https://imgs.search.brave.com/PjpdyiZBOnLWRHcvWlGPJhp-m_G-3XT661S0uxLQqHg/rs:fit:1200:1200:1/g:ce/aHR0cHM6Ly9jbGlw/Z3JvdW5kLmNvbS9p/bWFnZXMvcGl6emEt/cG5nLnBuZw" class="card-img-top" alt="...">
-  <div class="card-body">
-    <h5 class="card-title">Jalapeno and Olive cheese pizza</h5>
-    {{!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> --}}
-    <a href="#" class="btn btn-primary">Add to Cart</a> <p>Rs.240</p>
-  </div>
+<div class="row row-cols-8 row-cols-md-3  container g-3">
+    {{#each data }}
+    <div class="col">
+        <div class="card">
+            <img src="{{this.image}}" class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 class="card-title">{{this.name}}</h5>
+                <p class="card-text">Rs {{this.price}}</p>
+                <p class="card-text">{{this.size}}</p>
+            </div>
+        </div>
+    </div>
+    {{/each}}
 </div>
 </body>
 </html>

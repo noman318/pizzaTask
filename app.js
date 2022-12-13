@@ -1,10 +1,10 @@
 const express = require("express");
 const exphbs = require("express-handlebars");
-const csurf = require("csurf");
 const path = require("path");
 const multer = require("multer");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
+const Handlebars = require("handlebars");
 const seceret = "assd123^&*^&*ghghggh";
 const oneDay = 1000 * 60 * 60 * 24;
 const sessions = require("express-session");
@@ -15,9 +15,13 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const userModel = require("./models/user");
 const tokenModel = require("./models/token");
+const pizzaModel = require("./models/pizza");
+const {
+  allowInsecurePrototypeAccess,
+} = require("@handlebars/allow-prototype-access");
 
 const app = express();
-mongoose.set('strictQuery',true)
+mongoose.set("strictQuery", true);
 const saltRounds = 10;
 let transporter = nodemailer.createTransport({
   service: "gmail",
@@ -35,12 +39,11 @@ transporter.use(
     viewPath: "views/emailTemplates/",
   })
 );
-
+// uname: noman
+// password: 123456
 //database connection
 mongoose
-  .connect(
-    "mongodb://localhost:27017/pizzaStore"
-  )
+  .connect("mongodb://localhost:27017/pizzaStore")
   .then((res) => console.log("MongoDB Connected"))
   .catch((err) => console.log("Error : " + err));
 //end
@@ -55,13 +58,16 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(csrfMiddleware);
-app.engine("handlebars", exphbs.engine());
+app.engine(
+  "handlebars",
+  exphbs.engine({ handlebars: allowInsecurePrototypeAccess(Handlebars) })
+);
 app.set("view engine", "handlebars");
 app.set("views", "./views");
 app.use(express.static("uploads"));
+app.use(express.static("img"));
+app.use("/img", express.static("img"));
 
-//start upload code
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, "/uploads"));
@@ -84,27 +90,81 @@ const upload = multer({
 });
 var session;
 app.get("/", (req, res) => {
-  res.render("login");
+  res.render("index");
 });
 const uploadSingle = upload.single("avatar");
 
-// const folderPath = __dirname + "/uploads";
-// app.get("/downloadsingle", (req, res) => {
-//   let username = req.session.username;
-//   if (username) {
-//     userModel.findOne({ username: username }, (err, data) => {
-//       if (err) {
-//       } else {
-//         res.download(folderPath + `/${data.image}`, (err) => {
-//           if (err) {
-//           }
-//         });
-//       }
-//     });
-//   } else {
-//     res.redirect("/login");
-//   }
+// app.get("/create", (req, res) => {
+//   pizzaModel.create([
+//     {
+//       name: "good Pizza",
+//       price: 120,
+//       size: "small",
+//       image: "pizza.jpg",
+//     },
+//     {
+//       name: "good Pizza",
+//       price: 120,
+//       size: "small",
+//       image: "pizza.jpg",
+//     },
+//     {
+//       name: "good Pizza",
+//       price: 120,
+//       size: "small",
+//       image: "pizza2.jpg",
+//     },
+//     {
+//       name: "good Pizza",
+//       price: 120,
+//       size: "small",
+//       image: "pizza2.jpg",
+//     },
+//     {
+//       name: "good Pizza",
+//       price: 120,
+//       size: "small",
+//       image: "pizza2.jpg",
+//     },
+//     {
+//       name: "good Pizza",
+//       price: 120,
+//       size: "small",
+//       image: "pizza2.jpg",
+//     },
+//     {
+//       name: "good Pizza",
+//       price: 120,
+//       size: "small",
+//       image: "pizza2.jpg",
+//     },
+//     {
+//       name: "good Pizza",
+//       price: 120,
+//       size: "small",
+//       image: "pizza2.jpg",
+//     },
+//   ]);
+//   res.end();
 // });
+
+app.get("/allpizza", (req, res) => {
+  let username = req.session.username;
+  if (username) {
+    pizzaModel
+      .find()
+      .then((products) => {
+        console.log(products);
+        res.render("item", {
+          data: products,
+          // count: count,
+        });
+      })
+      .catch((err) => console.log(err));
+  } else {
+    return res.redirect("/login");
+  }
+});
 
 app.post("/uploadfile", (req, res) => {
   uploadSingle(req, res, (err) => {
@@ -167,16 +227,16 @@ app.post("/postregis", (req, res) => {
     if (err) {
       res.render("regis", { error: err.message });
     } else {
-      let { email, uname, password,phone,address } = req.body;
-      console.log(req.body)
+      let { email, uname, password, phone, address } = req.body;
+      console.log(req.body);
       const hash = bcrypt.hashSync(password, saltRounds);
       userModel
         .create({
           email: email,
           username: uname,
           password: hash,
-          phone:phone,
-          address:address,
+          phone: phone,
+          address: address,
           image: req.file.filename,
           status: 0,
         })
@@ -206,9 +266,7 @@ app.post("/postregis", (req, res) => {
   });
 });
 
-
 app.get("/welcome", (req, res) => {
-  //let username=req.cookies.username;
   let username = req.session.username;
   if (username) {
     userModel.findOne({ username: username }, (err, data) => {
@@ -223,7 +281,6 @@ app.get("/welcome", (req, res) => {
 });
 app.get("/logout", (req, res) => {
   req.session.destroy();
-  //res.clearCookie("username");
   return res.redirect("/login");
 });
 app.get("/resetpassword", (req, res) => {
